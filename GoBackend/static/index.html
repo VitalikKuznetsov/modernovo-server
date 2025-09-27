@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modernovo</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.7;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .nav-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 80px;
+        }
+
+        .nav-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .nav-card:active {
+            transform: scale(0.98);
+            background: var(--tg-theme-section-bg-color, #e0e0e0);
+        }
+
+        .nav-card i {
+            font-size: 32px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .nav-card-content h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .nav-card-content p {
+            font-size: 14px;
+            opacity: 0.7;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-top: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 8px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-items {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 12px;
+            transition: background 0.2s ease;
+            background: transparent;
+            border: none;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .nav-item:active {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .nav-item.active {
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Стили для страницы профиля */
+        .auth-container {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            background: var(--tg-theme-bg-color, #ffffff);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            background: transparent;
+            border: none;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .auth-tab.active {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            font-size: 16px;
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 16px;
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s ease;
+        }
+
+        .auth-button:active {
+            background: var(--tg-theme-button-color, #1a6db0);
+            transform: scale(0.98);
+        }
+
+        .user-info {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .user-info.active {
+            display: block;
+        }
+
+        .user-info h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .user-info p {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-bottom: 16px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .logout-button {
+            background: var(--tg-theme-destructive-text-color, #ff3b30);
+            color: white;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .notification.success {
+            background: #34C759;
+            opacity: 1;
+        }
+
+        .notification.error {
+            background: #FF3B30;
+            opacity: 1;
+        }
+
+        /* Адаптация под разные размеры экрана */
+        @media (max-width: 360px) {
+            .container {
+                padding: 12px;
+            }
+            
+            .nav-card {
+                padding: 16px;
+            }
+            
+            .nav-card i {
+                font-size: 28px;
+            }
+        }
+
+        /* Специфичные стили для Telegram */
+        .tg-background {
+            background: var(--tg-theme-bg-color, #ffffff);
+        }
+    </style>
+</head>
+<body class="tg-background">
+    <!-- Главная страница -->
+    <div id="home-page" class="page active">
+        <div class="container">
+            <div class="header">
+                <h1>Modernovo</h1>
+                <p>Добро пожаловать в наш магазин!</p>
+            </div>
+
+            <div class="nav-cards">
+                <button class="nav-card" onclick="showSection('catalog')">
+                    <i>📁</i>
+                    <div class="nav-card-content">
+                        <h3>Каталог</h3>
+                        <p>Огромный выбор товаров</p>
+                    </div>
+                </button>
+
+                <button class="nav-card" onclick="showSection('discounts')">
+                    <i>💰</i>
+                    <div class="nav-card-content">
+                        <h3>Скидки</h3>
+                        <p>Специальные предложения</p>
+                    </div>
+                </button>
+
+                <button class="nav-card" onclick="showSection('news')">
+                    <i>📰</i>
+                    <div class="nav-card-content">
+                        <h3>Новинки</h3>
+                        <p>Свежие поступления</p>
+                    </div>
+                </button>
+            </div>
+            
+            <!-- Информация о пользователе -->
+            <div id="user-info" class="user-info">
+                <h3>Добро пожаловать, <span id="user-name">Пользователь</span>!</h3>
+                <p>Email: <span id="user-email"></span></p>
+                <button onclick="logout()" class="auth-button logout-button">Выйти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Страница профиля -->
+    <div id="profile-page" class="page">
+        <div class="container">
+            <div class="header">
+                <h1>Профиль</h1>
+                <p id="profile-subtitle">Войдите или зарегистрируйтесь</p>
+            </div>
+
+            <div class="auth-container">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showAuthTab('login')">Вход</button>
+                    <button class="auth-tab" onclick="showAuthTab('register')">Регистрация</button>
+                </div>
+
+                <!-- Форма входа -->
+                <div id="login-form" class="auth-form active">
+                    <form onsubmit="handleLogin(event)">
+                        <div class="form-group">
+                            <label for="login-email">Email:</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Пароль:</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="auth-button">Войти</button>
+                    </form>
+                </div>
+
+                <!-- Форма регистрации -->
+                <div id="register-form" class="auth-form">
+                    <form onsubmit="handleRegister(event)">
+                        <div class="form-group">
+                            <label for="register-email">Email:</label>
+                            <input type="email" id="register-email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Пароль:</label>
+                            <input type="password" id="register-password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-confirm">Подтвердите пароль:</label>
+                            <input type="password" id="register-confirm" required>
+                        </div>
+                        <button type="submit" class="auth-button">Зарегистрироваться</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Нижняя навигационная панель -->
+    <div class="bottom-nav">
+        <div class="nav-items">
+            <button class="nav-item active" onclick="showPage('home-page', this)">
+                <i>🏠</i>
+                <span>Главная</span>
+            </button>
+            <button class="nav-item" onclick="showPage('home-page', this)">
+                <i>❤️</i>
+                <span>Избранное</span>
+            </button>
+            <button class="nav-item" onclick="showPage('home-page', this)">
+                <i>🛒</i>
+                <span>Корзина</span>
+            </button>
+            <button class="nav-item" onclick="showPage('profile-page', this)">
+                <i>👤</i>
+                <span>Профиль</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+    // Инициализация Telegram Web App
+    let tg = window.Telegram.WebApp;
+    let currentUser = null;
+
+    // Расширяем приложение на весь экран
+    tg.expand();
+    
+    // Устанавливаем цвет фона в соответствии с темой Telegram
+    tg.setHeaderColor('secondary_bg_color');
+    tg.backgroundColor = 'secondary_bg_color';
+
+    // Показ уведомлений
+    function showNotification(message, isSuccess) {
+        const notification = document.getElementById('notification');
+        notification.textContent = message;
+        notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+        
+        setTimeout(() => {
+            notification.className = 'notification';
+        }, 3000);
+        
+        console.log('Notification:', message, isSuccess);
+    }
+
+    // Регистрация с улучшенной отладкой
+    // Регистрация с улучшенной отладкой
+// Регистрация с правильным индикатором загрузки
+async function handleRegister(event) {
+    event.preventDefault();
+    console.log('handleRegister called');
+    
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const confirm = document.getElementById('register-confirm').value;
+    
+    console.log('Form data:', { email, password, confirm });
+    
+    if (password !== confirm) {
+        showNotification('Пароли не совпадают!', false);
+        return;
+    }
+    
+    if (!email || !password) {
+        showNotification('Заполните все поля!', false);
+        return;
+    }
+
+    // Блокируем форму и показываем загрузку
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    
+    submitButton.textContent = 'Регистрация...';
+    submitButton.disabled = true;
+    form.querySelectorAll('input').forEach(input => input.disabled = true);
+
+    try {
+        console.log('Sending registration request...');
+        
+        const response = await fetch('/api/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        console.log('Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (response.ok) {
+            showNotification('✅ Регистрация успешна! Теперь войдите.', true);
+            showAuthTab('login');
+            form.reset();
+        } else {
+            showNotification('❌ ' + data.error, false);
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showNotification('❌ Ошибка сети: ' + error.message, false);
+    } finally {
+        // Разблокируем форму
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        form.querySelectorAll('input').forEach(input => input.disabled = false);
+    }
+}
+
+// Вход с правильным индикатором загрузки
+async function handleLogin(event) {
+    event.preventDefault();
+    console.log('handleLogin called');
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    console.log('Login data:', { email, password });
+    
+    if (!email || !password) {
+        showNotification('Заполните все поля!', false);
+        return;
+    }
+
+    // Блокируем форму и показываем загрузку
+    const form = event.target;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const originalText = submitButton.textContent;
+    
+    submitButton.textContent = 'Вход...';
+    submitButton.disabled = true;
+    form.querySelectorAll('input').forEach(input => input.disabled = true);
+
+    try {
+        console.log('Sending login request...');
+        
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password })
+        });
+        
+        console.log('Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (response.ok) {
+            showNotification('✅ Вход успешен!', true);
+            currentUser = { email };
+            updateUIAfterLogin();
+            showPage('home-page', document.querySelector('.nav-item'));
+            form.reset();
+        } else {
+            showNotification('❌ ' + data.error, false);
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('❌ Ошибка сети: ' + error.message, false);
+    } finally {
+        // Разблокируем форму
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+        form.querySelectorAll('input').forEach(input => input.disabled = false);
+    }
+}
+
+    // Навигация между страницами
+    function showPage(pageId, clickedItem) {
+        console.log('Showing page:', pageId);
+        
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(pageId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        clickedItem.classList.add('active');
+        
+        if (pageId === 'home-page' && currentUser) {
+            updateUIAfterLogin();
+        }
+        
+        // Обновляем кнопку "Назад"
+        updateBackButton();
+        
+        // Плавная прокрутка вверх
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showAuthTab(tabName) {
+        console.log('Showing auth tab:', tabName);
+        
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.auth-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        
+        event.target.classList.add('active');
+        document.getElementById(tabName + '-form').classList.add('active');
+    }
+
+    function showSection(sectionId) {
+        showNotification('Раздел "' + sectionId + '" в разработке', true);
+    }
+
+    function updateBackButton() {
+        if (document.getElementById('profile-page').classList.contains('active')) {
+            tg.BackButton.show();
+        } else {
+            tg.BackButton.hide();
+        }
+    }
+
+    // Проверяем авторизацию при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing...');
+        
+        showPage('home-page', document.querySelector('.nav-item'));
+        
+        // Настраиваем кнопку "Назад" в Telegram
+        tg.BackButton.onClick(() => {
+            console.log('Back button clicked');
+            if (document.getElementById('profile-page').classList.contains('active')) {
+                showPage('home-page', document.querySelector('.nav-item'));
+                tg.BackButton.hide();
+            }
+        });
+        
+        console.log('Initialization complete');
+    });
+</script>
+</body>
+</html>
