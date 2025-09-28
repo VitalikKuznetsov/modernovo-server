@@ -78,7 +78,7 @@ func (db *UserDB) Close() {
 	db.db.Close()
 }
 
-func ConnectToMyDB(connectSring string) (*UserDB, error) {
+func ConnectToUserDB(connectSring string) (*UserDB, error) {
 	db, err := sql.Open("postgres", connectSring)
 	if err != nil {
 		return nil, err

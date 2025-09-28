@@ -10,7 +10,7 @@ type StoreDB struct {
 	db *sql.DB
 }
 
-func ConnectToMyDB(connectSring string) (*StoreDB, error) {
+func ConnectToStoreDB(connectSring string) (*StoreDB, error) {
 	db, err := sql.Open("postgres", connectSring)
 	if err != nil {
 		return nil, err
@@ -55,20 +55,57 @@ func (db *StoreDB) DeleteProduct(id int) error {
 	return nil
 }
 
-func (db *StoreDB) GetInfoOfStoreDB(id int) (models.Product, error) {
+func (db *StoreDB) GetProduct(id int) (models.Product, error) {
 	var p models.Product
-	query := "SELECT Name, Description, Price, ImageURL FROM products WHERE ID = $1"
-	row := db.db.QueryRow(query)
+	query := "SELECT id, name, description, price, imageurl FROM products WHERE id = $1"
+	row := db.db.QueryRow(query, id)
 	err := row.Scan(
+		&p.ID,
 		&p.Name,
 		&p.Description,
 		&p.Price,
 		&p.ImageURL,
 	)
-	p.ID = id
 
 	if err == sql.ErrNoRows {
-		return p, errors.New("user not found")
+		return p, errors.New("product not found")
+	}
+	if err != nil {
+		return p, err
 	}
 	return p, nil
+}
+
+func (db *StoreDB) GetAllProducts(limit, offset int) ([]models.Product, error) {
+	query := "SELECT id, name, description, price, imageurl FROM products ORDER BY id LIMIT $1 OFFSET $2"
+	rows, err := db.db.Query(query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var products []models.Product
+	for rows.Next() {
+		var p models.Product
+		err := rows.Scan(
+			&p.ID,
+			&p.Name,
+			&p.Description,
+			&p.Price,
+			&p.ImageURL,
+		)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
+}
+
+func (db *StoreDB) GetProductsCount() (int, error) {
+	var count int
+	query := "SELECT COUNT(*) FROM products"
+	err := db.db.QueryRow(query).Scan(&count)
+	return count, err
 }

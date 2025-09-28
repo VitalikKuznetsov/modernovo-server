@@ -5,5 +5,10 @@ type Product struct {
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
 	Price       float64 `json:"price"`
-	ImageURL    string  `json:"imageUrl"`
+	ImageURL    string  `json:"ImageUrl"`
+}
+
+type ProductList struct {
+	Products []Product `json:"products"`
+	Total    int       `json:"total"`
 }

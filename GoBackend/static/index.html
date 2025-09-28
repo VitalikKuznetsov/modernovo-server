@@ -65,6 +65,7 @@
             border: none;
             width: 100%;
             text-align: left;
+            cursor: pointer;
         }
 
         .nav-card:active {
@@ -117,6 +118,7 @@
             background: transparent;
             border: none;
             color: var(--tg-theme-text-color, #000000);
+            cursor: pointer;
         }
 
         .nav-item:active {
@@ -151,7 +153,100 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Стили для страницы профиля */
+        /* Стили для каталога */
+        .catalog-container {
+            padding-bottom: 80px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .product-card {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .product-card:active {
+            transform: scale(0.98);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            background: var(--tg-theme-bg-color, #ffffff);
+        }
+
+        .product-info {
+            padding: 12px;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #000000);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .pagination-button {
+            background: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-button:active:not(:disabled) {
+            background: var(--tg-theme-button-color, #1a6db0);
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .loading-products {
+            text-align: center;
+            padding: 40px;
+            color: var(--tg-theme-hint-color, #999999);
+            grid-column: 1 / -1;
+        }
+
+        /* Стили для профиля */
         .profile-container {
             background: var(--tg-theme-secondary-bg-color, #f0f0f0);
             border-radius: 16px;
@@ -178,6 +273,7 @@
             background: transparent;
             border: none;
             color: var(--tg-theme-text-color, #000000);
+            cursor: pointer;
         }
 
         .auth-tab.active {
@@ -240,6 +336,7 @@
             font-weight: 600;
             transition: background 0.2s ease;
             margin-bottom: 10px;
+            cursor: pointer;
         }
 
         .auth-button:active {
@@ -401,6 +498,10 @@
             .nav-card i {
                 font-size: 28px;
             }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Специфичные стили для Telegram */
@@ -419,7 +520,7 @@
             </div>
 
             <div class="nav-cards">
-                <button class="nav-card" onclick="showSection('catalog')">
+                <button class="nav-card" onclick="showPage('catalog-page', document.querySelectorAll('.nav-item')[1])">
                     <i>📁</i>
                     <div class="nav-card-content">
                         <h3>Каталог</h3>
@@ -427,15 +528,15 @@
                     </div>
                 </button>
 
-                <button class="nav-card" onclick="showSection('discounts')">
-                    <i>💰</i>
-                    <div class="nav-card-content">
-                        <h3>Скидки</h3>
-                        <p>Специальные предложения</p>
-                    </div>
-                </button>
+               <button class="nav-card" onclick="showNotification('Раздел \'Скидки\' в разработке', true)">
+    <i>💰</i>
+    <div class="nav-card-content">
+        <h3>Скидки</h3>
+        <p>Специальные предложения</p>
+    </div>
+</button>
 
-                <button class="nav-card" onclick="showSection('news')">
+                <button class="nav-card" onclick="showNotification('Раздел \'Новинки\' в разработке', true)">
                     <i>📰</i>
                     <div class="nav-card-content">
                         <h3>Новинки</h3>
@@ -453,6 +554,28 @@
         </div>
     </div>
 
+    <!-- Страница каталога -->
+    <div id="catalog-page" class="page">
+        <div class="container">
+            <div class="header">
+                <h1>Каталог</h1>
+                <p>Выберите товары из нашего ассортимента</p>
+            </div>
+
+            <div class="catalog-container">
+                <div id="products-grid" class="products-grid">
+                    <div class="loading-products">Загрузка товаров...</div>
+                </div>
+
+                <div class="pagination">
+                    <button id="prev-page" class="pagination-button" onclick="changePage(currentPage - 1)">Назад</button>
+                    <span id="page-info" class="pagination-info">Страница 1</span>
+                    <button id="next-page" class="pagination-button" onclick="changePage(currentPage + 1)">Вперед</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Страница профиля -->
     <div id="profile-page" class="page">
         <div class="container">
@@ -465,9 +588,9 @@
                 <!-- Формы входа/регистрации -->
                 <div id="auth-forms">
                     <div class="auth-tabs">
-    <button class="auth-tab active" onclick="showAuthTab('login', this)">Вход</button>
-    <button class="auth-tab" onclick="showAuthTab('register', this)">Регистрация</button>
-</div>
+                        <button class="auth-tab active" onclick="showAuthTab('login')">Вход</button>
+                        <button class="auth-tab" onclick="showAuthTab('register')">Регистрация</button>
+                    </div>
 
                     <!-- Форма входа -->
                     <div id="login-form" class="auth-form active">
@@ -552,11 +675,11 @@
                 <i>🏠</i>
                 <span>Главная</span>
             </button>
-            <button class="nav-item" onclick="showPage('home-page', this)">
-                <i>❤️</i>
-                <span>Избранное</span>
-            </button>
-            <button class="nav-item" onclick="showPage('home-page', this)">
+            <button class="nav-item" onclick="showNotification('Избранное в разработке', true)">
+    <i>❤️</i>
+    <span>Избранное</span>
+</button>
+            <button class="nav-item" onclick="showNotification('Корзина в разработке', true)">
                 <i>🛒</i>
                 <span>Корзина</span>
             </button>
@@ -582,6 +705,9 @@
     // Инициализация Telegram Web App
     let tg = window.Telegram.WebApp;
     let currentUser = null;
+    let currentPage = 1;
+    const productsPerPage = 8;
+    let totalProducts = 0;
 
     // Расширяем приложение на весь экран
     tg.expand();
@@ -606,6 +732,129 @@
     // Показать/скрыть индикатор загрузки
     function showLoading(show) {
         document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+    }
+
+    // Загрузка товаров
+    async function loadProducts(page = 1) {
+        const offset = (page - 1) * productsPerPage;
+        
+        showLoading(true);
+        
+        try {
+            const response = await fetch(`/api/products?limit=${productsPerPage}&offset=${offset}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayProducts(data.products);
+                totalProducts = data.total;
+                updatePagination(page);
+            } else {
+                showNotification('Ошибка загрузки товаров', false);
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
+            showNotification('Ошибка сети при загрузке товаров', false);
+        } finally {
+            showLoading(false);
+        }
+    }
+
+ function displayProducts(products) {
+    const grid = document.getElementById('products-grid');
+    
+    console.log('Products data received:', products);
+    
+    if (products.length === 0) {
+        grid.innerHTML = '<div class="loading-products">Товары не найдены</div>';
+        return;
+    }
+    
+    grid.innerHTML = products.map(product => {
+        // Получаем путь к изображению из базы данных
+        let imagePath = product.ImageUrl || '';
+        
+        console.log(`Product ${product.id} - Original imagePath: "${imagePath}"`);
+        
+        // Очищаем путь
+        imagePath = imagePath.trim();
+        
+        // Формируем правильный URL для вашей структуры
+        let imageUrl;
+        if (imagePath && imagePath !== '') {
+            // Если путь уже содержит полный URL, используем его
+            if (imagePath.startsWith('http')) {
+                imageUrl = imagePath;
+            } else {
+                // Преобразуем относительный путь в абсолютный
+                // Убираем лишние слеши и формируем корректный путь
+                const cleanPath = imagePath.replace(/^\/+|\/+$/g, '');
+                imageUrl = '/images/' + cleanPath;
+            }
+        } else {
+            // Запасной вариант если нет изображения
+            imageUrl = 'https://via.placeholder.com/200x150?text=No+Image';
+        }
+        
+        console.log(`Final imageUrl for product ${product.id}: "${imageUrl}"`);
+        
+        return `
+            <div class="product-card" onclick="showProductDetail(${product.id})">
+                <img src="${imageUrl}" 
+                     alt="${product.name}" 
+                     class="product-image"
+                     onerror="handleImageError(this, ${product.id})">
+                <div class="product-info">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">${product.price ? product.price.toFixed(2) : '0.00'} ₽</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+
+// Обработка ошибок загрузки изображений
+function handleImageError(imgElement, productId) {
+    console.log(`Image load error for product ${productId}, src: ${imgElement.src}`);
+    
+    // Устанавливаем заглушку для изображения
+    imgElement.src = 'https://via.placeholder.com/200x150?text=No+Image';
+    imgElement.alt = 'Изображение недоступно';
+    
+    // Убираем обработчик ошибок, чтобы избежать бесконечного цикла
+    imgElement.onerror = null;
+}
+
+    // Обновление пагинации
+    function updatePagination(page) {
+        currentPage = page;
+        const totalPages = Math.ceil(totalProducts / productsPerPage);
+        
+        document.getElementById('page-info').textContent = `Страница ${page} из ${totalPages}`;
+        document.getElementById('prev-page').disabled = page <= 1;
+        document.getElementById('next-page').disabled = page >= totalPages;
+    }
+
+    // Смена страницы
+    function changePage(newPage) {
+        if (newPage >= 1 && newPage <= Math.ceil(totalProducts / productsPerPage)) {
+            loadProducts(newPage);
+        }
+    }
+
+    // Показать детали товара
+    function showProductDetail(productId) {
+        // Найдем товар в текущем списке
+        const productElement = document.querySelector(`.product-card[onclick="showProductDetail(${productId})"]`);
+        if (productElement) {
+            const productName = productElement.querySelector('.product-name').textContent;
+            const productPrice = productElement.querySelector('.product-price').textContent;
+            const productImage = productElement.querySelector('.product-image').src;
+            
+            // Покажем уведомление с информацией о товаре
+            showNotification(`Товар: ${productName}<br>Цена: ${productPrice}`, true);
+        } else {
+            showNotification(`Товар #${productId} - функция в разработке`, true);
+        }
     }
 
     // Обновление интерфейса после входа
@@ -919,6 +1168,10 @@
             updateUIAfterLogin();
         }
         
+        if (pageId === 'catalog-page') {
+            loadProducts();
+        }
+        
         // Обновляем кнопку "Назад"
         updateBackButton();
         
@@ -926,31 +1179,18 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function showAuthTab(tabName, clickedElement) {
-    console.log('Showing auth tab:', tabName);
-    
-    document.querySelectorAll('.auth-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.auth-form').forEach(form => {
-        form.classList.remove('active');
-    });
-    
-    // Если передан элемент, активируем его, иначе находим по tabName
-    if (clickedElement) {
-        clickedElement.classList.add('active');
-    } else {
-        const targetTab = document.querySelector(`.auth-tab[onclick*="${tabName}"]`);
-        if (targetTab) {
-            targetTab.classList.add('active');
-        }
-    }
-    
-    document.getElementById(tabName + '-form').classList.add('active');
-}
-
-    function showSection(sectionId) {
-        showNotification('Раздел "' + sectionId + '" в разработке', true);
+    function showAuthTab(tabName) {
+        console.log('Showing auth tab:', tabName);
+        
+        document.querySelectorAll('.auth-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.auth-form').forEach(form => {
+            form.classList.remove('active');
+        });
+        
+        document.getElementById(tabName + '-form').classList.add('active');
+        document.querySelector(`.auth-tab[onclick="showAuthTab('${tabName}')"]`).classList.add('active');
     }
 
     function updateBackButton() {
