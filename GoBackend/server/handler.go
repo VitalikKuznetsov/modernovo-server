@@ -14,7 +14,6 @@ import (
 func SetupRoutes(router *mux.Router, staticPath string) {
 	fs := http.FileServer(http.Dir(staticPath))
 
-	// Исправляем названия функций - должны совпадать с HTML
 	router.HandleFunc("/api/register", handleRegister).Methods("POST")
 	router.HandleFunc("/api/login", handleLogin).Methods("POST")
 	router.HandleFunc("/api/profile", handleAddInfo).Methods("PUT")
@@ -23,7 +22,6 @@ func SetupRoutes(router *mux.Router, staticPath string) {
 	router.PathPrefix("/").Handler(fs)
 }
 
-// Переименовываем функции для соответствия с HTML
 func handleRegister(w http.ResponseWriter, r *http.Request) {
 	var uj models.UserRegOrLog
 	err := json.NewDecoder(r.Body).Decode(&uj)
@@ -32,7 +30,6 @@ func handleRegister(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Валидация
 	if uj.Email == "" || uj.Password == "" {
 		sendError(w, "Email and password are required", http.StatusBadRequest)
 		return
@@ -68,7 +65,6 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Валидация
 	if uj.Email == "" || uj.Password == "" {
 		sendError(w, "Email and password are required", http.StatusBadRequest)
 		return
@@ -112,7 +108,7 @@ func handleAddInfo(w http.ResponseWriter, r *http.Request) {
 	}
 	defer mydb.Close()
 
-	err = mydb.AddInfoToDB(u.Name, u.Surname, u.PhoneNumber, u.DateOfBirth, u.Email)
+	err = mydb.AddInfoToDB(u.Name, u.PhoneNumber, u.Email)
 	if err != nil {
 		if err.Error() == "user not found" {
 			sendError(w, "User not found", http.StatusNotFound)
@@ -156,7 +152,6 @@ func handleGetInfo(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userInfo)
 }
 
-// Вспомогательные функции
 func sendError(w http.ResponseWriter, message string, statusCode int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)

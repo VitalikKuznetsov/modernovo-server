@@ -24,9 +24,6 @@ func StartServer() {
 		Handler: router,
 	}
 
-	log.Printf("🚀 Server starting on http://%s", server.Addr)
-	log.Printf("📁 Serving static files from: %s", staticPath)
-
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}

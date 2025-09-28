@@ -47,9 +47,9 @@ func (db *MyDB) Login(email, password string) error {
 	return err
 }
 
-func (db *MyDB) AddInfoToDB(name, surname, phonenumber, dateofbirth, email string) error {
-	query := "UPDATE users SET Name = $1, Surname = $2, PhoneNumber = $3, DateOfBirth = $4 WHERE Email = $5"
-	r, err := db.db.Exec(query, name, surname, phonenumber, dateofbirth, email)
+func (db *MyDB) AddInfoToDB(name, phonenumber, email string) error {
+	query := "UPDATE users SET Name = $1, PhoneNumber = $2 WHERE Email = $3"
+	r, err := db.db.Exec(query, name, phonenumber, email)
 	rowsAffected, _ := r.RowsAffected()
 	if rowsAffected == 0 {
 		return errors.New("user not found")
@@ -58,15 +58,13 @@ func (db *MyDB) AddInfoToDB(name, surname, phonenumber, dateofbirth, email strin
 }
 
 func (db *MyDB) GetInfoOfDB(email string) (models.InfoForUser, error) {
-	query := "SELECT Name, Surname, PhoneNumber, DateOfBirth FROM users WHERE Email = $1"
+	query := "SELECT Name, PhoneNumber FROM users WHERE Email = $1"
 	row := db.db.QueryRow(query, email)
 	user := models.InfoForUser{}
 
 	err := row.Scan(
 		&user.Name,
-		&user.Surname,
 		&user.PhoneNumber,
-		&user.DateOfBirth,
 	)
 	user.Email = email
 
