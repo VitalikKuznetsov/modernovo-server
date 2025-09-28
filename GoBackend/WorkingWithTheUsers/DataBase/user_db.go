@@ -9,11 +9,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type MyDB struct {
+type UserDB struct {
 	db *sql.DB
 }
 
-func (db *MyDB) AddUser(email, password string) error {
+func (db *UserDB) AddUser(email, password string) error {
 	var exists bool
 	err := db.db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE Email = $1)", email).Scan(&exists)
 	if err != nil {
@@ -29,7 +29,7 @@ func (db *MyDB) AddUser(email, password string) error {
 	return err
 }
 
-func (db *MyDB) Login(email, password string) error {
+func (db *UserDB) Login(email, password string) error {
 	query := "SELECT Email, Password FROM users WHERE Email = $1 AND Password = $2"
 
 	row := db.db.QueryRow(query, email, password)
@@ -47,7 +47,7 @@ func (db *MyDB) Login(email, password string) error {
 	return err
 }
 
-func (db *MyDB) AddInfoToDB(name, phonenumber, email string) error {
+func (db *UserDB) AddInfoToDB(name, phonenumber, email string) error {
 	query := "UPDATE users SET Name = $1, PhoneNumber = $2 WHERE Email = $3"
 	r, err := db.db.Exec(query, name, phonenumber, email)
 	rowsAffected, _ := r.RowsAffected()
@@ -57,7 +57,7 @@ func (db *MyDB) AddInfoToDB(name, phonenumber, email string) error {
 	return err
 }
 
-func (db *MyDB) GetInfoOfDB(email string) (models.InfoForUser, error) {
+func (db *UserDB) GetInfoOfDB(email string) (models.InfoForUser, error) {
 	query := "SELECT Name, PhoneNumber FROM users WHERE Email = $1"
 	row := db.db.QueryRow(query, email)
 	user := models.InfoForUser{}
@@ -74,11 +74,11 @@ func (db *MyDB) GetInfoOfDB(email string) (models.InfoForUser, error) {
 	return user, nil
 }
 
-func (db *MyDB) Close() {
+func (db *UserDB) Close() {
 	db.db.Close()
 }
 
-func ConnectToMyDB(connectSring string) (*MyDB, error) {
+func ConnectToMyDB(connectSring string) (*UserDB, error) {
 	db, err := sql.Open("postgres", connectSring)
 	if err != nil {
 		return nil, err
@@ -88,5 +88,5 @@ func ConnectToMyDB(connectSring string) (*MyDB, error) {
 		return nil, err
 	}
 
-	return &MyDB{db: db}, nil
+	return &UserDB{db: db}, nil
 }
