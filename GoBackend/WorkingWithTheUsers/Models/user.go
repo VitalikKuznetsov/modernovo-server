@@ -17,3 +17,23 @@ type InfoForUser struct {
 	Name        string `json:"name"`
 	PhoneNumber string `json:"phonenumber"`
 }
+
+type Session struct {
+	Token string `json:"token"`
+	Email string `json:"email"`
+}
+
+type AuthResponse struct {
+	Token string `json:"token"`
+	Email string `json:"email"`
+}
+
+type Favorite struct {
+	ID        int    `json:"id"`
+	UserEmail string `json:"user_email"`
+	ProductID int    `json:"product_id"`
+}
+
+type FavoriteRequest struct {
+	ProductID int `json:"product_id"`
+}
