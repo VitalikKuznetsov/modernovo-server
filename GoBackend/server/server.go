@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +38,7 @@ func StartServer() {
 	handler := corsMiddleware(router)
 
 	server := &http.Server{
-		Addr:    "127.0.0.1:8080",
+		Addr:    "0.0.0.0:8080",
 		Handler: handler,
 	}
 
@@ -47,21 +48,21 @@ func StartServer() {
 }
 
 func getStaticPath() (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
+	possiblePaths := []string{
+		"./static",
+		"../static",
+		"../../static",
+		"./../static",
 	}
 
-	staticPath := filepath.Join(wd, "..", "static")
-
-	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
-		return "", err
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			indexPath := filepath.Join(path, "index.html")
+			if _, err := os.Stat(indexPath); err == nil {
+				return path, nil
+			}
+		}
 	}
 
-	indexPath := filepath.Join(staticPath, "index.html")
-	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
-		return "", err
-	}
-
-	return staticPath, nil
+	return "", errors.New("не удалось найти папку static с index.html")
 }

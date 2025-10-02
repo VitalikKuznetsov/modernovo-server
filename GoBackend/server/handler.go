@@ -58,6 +58,7 @@ func SetupRoutes(router *mux.Router, staticPath string) {
 
 	router.HandleFunc("/api/products", handleGetProducts).Methods("GET")
 	router.HandleFunc("/api/products/{id}", handleGetProduct).Methods("GET")
+	router.HandleFunc("/api/products/{id}/detail", handleGetProductDetail).Methods("GET")
 
 	router.HandleFunc("/api/favorites", handleGetFavorites).Methods("GET")
 	router.HandleFunc("/api/favorites", handleAddToFavorites).Methods("POST")
@@ -488,6 +489,44 @@ func handleGetProduct(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(product)
+}
+
+func handleGetProductDetail(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		sendError(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	storeDB, err := sd.ConnectToStoreDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer storeDB.Close()
+
+	product, err := storeDB.GetProduct(id)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendError(w, "Product not found", http.StatusNotFound)
+		} else {
+			log.Printf("Failed to get product: %v", err)
+			sendError(w, "Failed to get product", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	productDetail := sm.ProductDetail{
+		Product:        product,
+		AdditionalInfo: "Дополнительная информация о товаре",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(productDetail)
 }
 
 func sendError(w http.ResponseWriter, message string, statusCode int) {

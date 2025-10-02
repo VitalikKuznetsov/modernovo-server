@@ -4,6 +4,7 @@ import (
 	"Modernovo/GoBackend/WorkingWithTheStore/models"
 	"database/sql"
 	"errors"
+	"strings"
 )
 
 type StoreDB struct {
@@ -57,14 +58,17 @@ func (db *StoreDB) DeleteProduct(id int) error {
 
 func (db *StoreDB) GetProduct(id int) (models.Product, error) {
 	var p models.Product
-	query := "SELECT id, name, description, price, imageurl FROM products WHERE id = $1"
+	query := "SELECT id, name, description, price, imageurl, image_urls FROM products WHERE id = $1"
 	row := db.db.QueryRow(query, id)
+
+	var imageURLsStr sql.NullString
 	err := row.Scan(
 		&p.ID,
 		&p.Name,
 		&p.Description,
 		&p.Price,
 		&p.ImageURL,
+		&imageURLsStr,
 	)
 
 	if err == sql.ErrNoRows {
@@ -73,11 +77,24 @@ func (db *StoreDB) GetProduct(id int) (models.Product, error) {
 	if err != nil {
 		return p, err
 	}
+
+	if imageURLsStr.Valid && imageURLsStr.String != "" {
+		cleaned := strings.Trim(imageURLsStr.String, "{}")
+		if cleaned != "" {
+			urls := strings.Split(cleaned, ",")
+			p.ImageURLs = urls
+		}
+	}
+
+	if len(p.ImageURLs) == 0 && p.ImageURL != "" {
+		p.ImageURLs = []string{p.ImageURL}
+	}
+
 	return p, nil
 }
 
 func (db *StoreDB) GetAllProducts(limit, offset int) ([]models.Product, error) {
-	query := "SELECT id, name, description, price, imageurl FROM products ORDER BY id LIMIT $1 OFFSET $2"
+	query := "SELECT id, name, description, price, imageurl, image_urls FROM products ORDER BY id LIMIT $1 OFFSET $2"
 	rows, err := db.db.Query(query, limit, offset)
 	if err != nil {
 		return nil, err
@@ -87,16 +104,32 @@ func (db *StoreDB) GetAllProducts(limit, offset int) ([]models.Product, error) {
 	var products []models.Product
 	for rows.Next() {
 		var p models.Product
+		var imageURLsStr sql.NullString
+
 		err := rows.Scan(
 			&p.ID,
 			&p.Name,
 			&p.Description,
 			&p.Price,
 			&p.ImageURL,
+			&imageURLsStr,
 		)
 		if err != nil {
 			return nil, err
 		}
+
+		if imageURLsStr.Valid && imageURLsStr.String != "" {
+			cleaned := strings.Trim(imageURLsStr.String, "{}")
+			if cleaned != "" {
+				urls := strings.Split(cleaned, ",")
+				p.ImageURLs = urls
+			}
+		}
+
+		if len(p.ImageURLs) == 0 && p.ImageURL != "" {
+			p.ImageURLs = []string{p.ImageURL}
+		}
+
 		products = append(products, p)
 	}
 

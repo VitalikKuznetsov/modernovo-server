@@ -32,6 +32,7 @@
             text-align: center;
             margin-bottom: 24px;
             padding: 20px 0;
+            position: relative;
         }
 
         .header h1 {
@@ -101,6 +102,7 @@
             border-top: 1px solid var(--tg-theme-secondary-bg-color, #f0f0f0);
             padding: 8px 0;
             backdrop-filter: blur(10px);
+            z-index: 1000;
         }
 
         .nav-items {
@@ -522,6 +524,156 @@
             100% { transform: scale(1); }
         }
 
+        .product-detail-container {
+            padding-bottom: 80px;
+        }
+
+        .product-gallery {
+            margin-bottom: 20px;
+        }
+
+        .main-image-container {
+            width: 100%;
+            height: 300px;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
+        .main-product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .thumbnail.active {
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .thumbnail:active {
+            transform: scale(0.95);
+        }
+
+        .product-detail-info {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .product-price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .product-detail-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--tg-theme-button-color, #2481cc);
+        }
+
+        .favorite-button-detail {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .favorite-button-detail:active {
+            transform: scale(0.9);
+        }
+
+        .product-description {
+            margin-bottom: 20px;
+        }
+
+        .product-description h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .product-description p {
+            font-size: 14px;
+            line-height: 1.4;
+            color: var(--tg-theme-text-color, #000000);
+            opacity: 0.8;
+        }
+
+        .additional-info {
+            margin-top: 20px;
+        }
+
+        .additional-info h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--tg-theme-section-bg-color, #e0e0e0);
+        }
+
+        .info-label {
+            font-weight: 500;
+            color: var(--tg-theme-hint-color, #999999);
+        }
+
+        .info-value {
+            color: var(--tg-theme-text-color, #000000);
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--tg-theme-text-color, #000000);
+            padding: 8px;
+            border-radius: 8px;
+            position: absolute;
+            left: 0;
+            top: 20px;
+        }
+
+        .back-button:active {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+        }
+
         @media (max-width: 360px) {
             .container {
                 padding: 12px;
@@ -537,6 +689,14 @@
 
             .products-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .main-image-container {
+                height: 250px;
+            }
+            
+            .product-detail-price {
+                font-size: 20px;
             }
         }
 
@@ -618,6 +778,46 @@
             <div class="catalog-container">
                 <div id="favorites-grid" class="products-grid">
                     <div class="loading-products">Загрузка избранного...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="product-detail-page" class="page">
+        <div class="container">
+            <div class="header">
+                <button class="back-button" onclick="goBackFromProduct()">←</button>
+                <h1 id="product-detail-name">Товар</h1>
+                <p id="product-detail-category">Детальная информация</p>
+            </div>
+
+            <div class="product-detail-container">
+                <div id="product-gallery" class="product-gallery">
+                    <div class="main-image-container">
+                        <img id="main-product-image" class="main-product-image" src="" alt="Основное изображение">
+                    </div>
+                    <div id="thumbnails" class="thumbnails">
+                    </div>
+                </div>
+
+                <div class="product-detail-info">
+                    <div class="product-price-section">
+                        <div class="product-detail-price" id="product-detail-price">0.00 ₽</div>
+                        <button class="favorite-button-detail" onclick="toggleFavoriteDetail()">
+                            <span id="favorite-heart-detail" class="favorite-heart">🤍</span>
+                        </button>
+                    </div>
+                    
+                    <div class="product-description">
+                        <h3>Описание</h3>
+                        <p id="product-detail-description">Описание товара</p>
+                    </div>
+
+                    <div class="additional-info">
+                        <h3>Характеристики</h3>
+                        <div class="info-grid" id="product-detail-specs">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -747,6 +947,8 @@
         const productsPerPage = 8;
         let totalProducts = 0;
         let userFavorites = new Set();
+        let currentProductId = null;
+        let currentProductImages = [];
 
         tg.expand();
         tg.setHeaderColor('secondary_bg_color');
@@ -843,25 +1045,14 @@
             }
             
             grid.innerHTML = products.map(product => {
-                let imagePath = product.ImageUrl || '';
-                imagePath = imagePath.trim();
-                
-                let imageUrl;
-                if (imagePath && imagePath !== '') {
-                    if (imagePath.startsWith('http')) {
-                        imageUrl = imagePath;
-                    } else {
-                        const cleanPath = imagePath.replace(/^\/+|\/+$/g, '');
-                        imageUrl = '/images/' + cleanPath;
-                    }
-                } else {
-                    imageUrl = 'https://via.placeholder.com/200x150?text=No+Image';
-                }
+                const imageUrls = product.image_urls || [];
+                const firstImage = imageUrls.length > 0 ? imageUrls[0] : product.ImageUrl;
+                const imageUrl = formatImageUrl(firstImage);
                 
                 const isFavorite = userFavorites.has(product.id);
                 
                 return `
-                    <div class="product-card" data-product-id="${product.id}" onclick="showProductDetail(${product.id})">
+                    <div class="product-card" data-product-id="${product.id}" onclick="showProductDetailFromCatalog(${product.id})">
                         <div class="favorite-overlay">
                             <button class="favorite-button" onclick="event.stopPropagation(); toggleFavorite(${product.id}, this.closest('.product-card'))">
                                 <span class="favorite-heart ${isFavorite ? 'active' : ''}">${isFavorite ? '❤️' : '🤍'}</span>
@@ -901,14 +1092,153 @@
             }
         }
 
-        function showProductDetail(productId) {
-            const productElement = document.querySelector(`.product-card[onclick="showProductDetail(${productId})"]`);
-            if (productElement) {
-                const productName = productElement.querySelector('.product-name').textContent;
-                const productPrice = productElement.querySelector('.product-price').textContent;
-                showNotification(`Товар: ${productName}<br>Цена: ${productPrice}`, true);
+        async function showProductDetail(productId) {
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`/api/products/${productId}/detail`);
+                if (response.ok) {
+                    const product = await response.json();
+                    displayProductDetail(product);
+                    showPage('product-detail-page');
+                } else {
+                    showNotification('Ошибка загрузки товара', false);
+                }
+            } catch (error) {
+                console.error('Error loading product detail:', error);
+                showNotification('Ошибка сети при загрузке товара', false);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayProductDetail(product) {
+            currentProductId = product.id;
+            currentProductImages = product.image_urls || [];
+            
+            document.getElementById('product-detail-name').textContent = product.name;
+            document.getElementById('product-detail-price').textContent = product.price ? product.price.toFixed(2) + ' ₽' : '0.00 ₽';
+            document.getElementById('product-detail-description').textContent = product.description || 'Описание отсутствует';
+            
+            displayProductGallery(currentProductImages);
+            updateFavoriteButton(product.id);
+            displayProductSpecs(product);
+        }
+
+        function displayProductGallery(imageUrls) {
+            const mainImage = document.getElementById('main-product-image');
+            const thumbnailsContainer = document.getElementById('thumbnails');
+            
+            if (imageUrls.length === 0) {
+                mainImage.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                thumbnailsContainer.innerHTML = '';
+                return;
+            }
+            
+            const firstImageUrl = formatImageUrl(imageUrls[0]);
+            mainImage.src = firstImageUrl;
+            
+            thumbnailsContainer.innerHTML = imageUrls.map((url, index) => {
+                const imageUrl = formatImageUrl(url);
+                return `
+                    <img src="${imageUrl}" 
+                         alt="Миниатюра ${index + 1}" 
+                         class="thumbnail ${index === 0 ? 'active' : ''}"
+                         onclick="changeMainImage(${index}, '${imageUrl}')"
+                         onerror="handleThumbnailError(this)">
+                `;
+            }).join('');
+        }
+
+        function formatImageUrl(url) {
+            if (!url || url.trim() === '') {
+                return 'https://via.placeholder.com/400x300?text=No+Image';
+            }
+            
+            url = url.trim();
+            
+            if (url.startsWith('http')) {
+                return url;
             } else {
-                showNotification(`Товар #${productId} - функция в разработке`, true);
+                const cleanPath = url.replace(/^\/+|\/+$/g, '');
+                return '/images/' + cleanPath;
+            }
+        }
+
+        function changeMainImage(index, imageUrl) {
+            const mainImage = document.getElementById('main-product-image');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            mainImage.src = imageUrl;
+            
+            thumbnails.forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+        }
+
+        function handleThumbnailError(imgElement) {
+            imgElement.src = 'https://via.placeholder.com/60x60?text=Error';
+            imgElement.onerror = null;
+        }
+
+        function updateFavoriteButton(productId) {
+            const isFavorite = userFavorites.has(productId);
+            const heartIcon = document.getElementById('favorite-heart-detail');
+            
+            if (heartIcon) {
+                heartIcon.textContent = isFavorite ? '❤️' : '🤍';
+                heartIcon.classList.toggle('active', isFavorite);
+            }
+        }
+
+        function toggleFavoriteDetail() {
+            if (currentProductId) {
+                toggleFavorite(currentProductId);
+                updateFavoriteButton(currentProductId);
+            }
+        }
+
+        function displayProductSpecs(product) {
+            const specsContainer = document.getElementById('product-detail-specs');
+            
+            const specs = [
+                { label: 'Артикул', value: `#${product.id}` },
+                { label: 'Бренд', value: 'Modernovo' },
+                { label: 'В наличии', value: 'Да' }
+            ];
+            
+            specsContainer.innerHTML = specs.map(spec => `
+                <div class="info-item">
+                    <span class="info-label">${spec.label}:</span>
+                    <span class="info-value">${spec.value}</span>
+                </div>
+            `).join('');
+        }
+
+        function goBackFromProduct() {
+            const activePages = ['catalog-page', 'favorites-page'];
+            const previousPage = activePages.find(page => 
+                localStorage.getItem(`last-visited-${page}`) === 'true'
+            ) || 'catalog-page';
+            
+            showPage(previousPage);
+        }
+
+        function showProductDetailFromCatalog(productId) {
+            localStorage.setItem('last-visited-catalog-page', 'true');
+            localStorage.setItem('last-visited-favorites-page', 'false');
+            showProductDetail(productId);
+        }
+
+        function addToCart() {
+            if (currentProductId) {
+                showNotification('Товар добавлен в корзину', true);
+            }
+        }
+
+        function buyNow() {
+            if (currentProductId) {
+                showNotification('Функция покупки в разработке', true);
             }
         }
 
@@ -1026,13 +1356,15 @@
             }
             
             grid.innerHTML = products.map(product => {
-                const imageUrl = product.ImageUrl ? `/images/${product.ImageUrl}` : 'https://via.placeholder.com/200x150?text=No+Image';
+                const imageUrls = product.image_urls || [];
+                const firstImage = imageUrls.length > 0 ? imageUrls[0] : product.ImageUrl;
+                const imageUrl = formatImageUrl(firstImage);
                 const isFavorite = userFavorites.has(product.id);
                 
                 return `
-                    <div class="product-card" data-product-id="${product.id}">
+                    <div class="product-card" data-product-id="${product.id}" onclick="showProductDetailFromCatalog(${product.id})">
                         <div class="favorite-overlay">
-                            <button class="favorite-button" onclick="toggleFavorite(${product.id}, this.closest('.product-card'))">
+                            <button class="favorite-button" onclick="event.stopPropagation(); toggleFavorite(${product.id}, this.closest('.product-card'))">
                                 <span class="favorite-heart active">❤️</span>
                             </button>
                         </div>
@@ -1282,6 +1614,13 @@
         }
 
         function showPage(pageId, clickedItem) {
+            if (pageId === 'catalog-page' || pageId === 'favorites-page') {
+                ['catalog-page', 'favorites-page'].forEach(page => {
+                    localStorage.setItem(`last-visited-${page}`, 'false');
+                });
+                localStorage.setItem(`last-visited-${pageId}`, 'true');
+            }
+            
             document.querySelectorAll('.page').forEach(page => {
                 page.classList.remove('active');
             });
@@ -1324,7 +1663,8 @@
         }
 
         function updateBackButton() {
-            if (document.getElementById('profile-page').classList.contains('active')) {
+            if (document.getElementById('profile-page').classList.contains('active') ||
+                document.getElementById('product-detail-page').classList.contains('active')) {
                 tg.BackButton.show();
             } else {
                 tg.BackButton.hide();
@@ -1339,6 +1679,8 @@
                 if (document.getElementById('profile-page').classList.contains('active')) {
                     showPage('home-page', document.querySelector('.nav-item'));
                     tg.BackButton.hide();
+                } else if (document.getElementById('product-detail-page').classList.contains('active')) {
+                    goBackFromProduct();
                 }
             });
         });
