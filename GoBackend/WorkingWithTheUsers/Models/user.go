@@ -37,3 +37,39 @@ type Favorite struct {
 type FavoriteRequest struct {
 	ProductID int `json:"product_id"`
 }
+
+type CartItem struct {
+	ProductID int     `json:"product_id"`
+	Quantity  int     `json:"quantity"`
+	Name      string  `json:"name"`
+	Price     float64 `json:"price"`
+	ImageURL  string  `json:"image_url"`
+}
+
+type CartRequest struct {
+	ProductID int `json:"product_id"`
+	Quantity  int `json:"quantity"`
+}
+
+type CartResponse struct {
+	Items     []CartItem `json:"items"`
+	Total     float64    `json:"total"`
+	ItemCount int        `json:"item_count"`
+}
+
+type AdminProduct struct {
+	ID          int      `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Price       float64  `json:"price"`
+	ImageURL    string   `json:"image_url"`
+	ImageURLs   []string `json:"image_urls"`
+}
+
+type AdminProductRequest struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Price       float64  `json:"price"`
+	ImageURL    string   `json:"image_url"`
+	ImageURLs   []string `json:"image_urls"`
+}

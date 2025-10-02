@@ -181,3 +181,90 @@ func generateToken() string {
 	rand.Read(bytes)
 	return hex.EncodeToString(bytes)
 }
+
+func (db *UserDB) AddToCart(userEmail string, productID, quantity int) error {
+	var exists bool
+	err := db.db.QueryRow("SELECT EXISTS(SELECT 1 FROM products WHERE id = $1)", productID).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errors.New("product not found")
+	}
+
+	query := `
+		INSERT INTO cart (user_email, product_id, quantity) 
+		VALUES ($1, $2, $3) 
+		ON CONFLICT (user_email, product_id) 
+		DO UPDATE SET quantity = cart.quantity + EXCLUDED.quantity
+	`
+	_, err = db.db.Exec(query, userEmail, productID, quantity)
+	return err
+}
+
+func (db *UserDB) UpdateCartItem(userEmail string, productID, quantity int) error {
+	if quantity <= 0 {
+		return db.RemoveFromCart(userEmail, productID)
+	}
+
+	query := "UPDATE cart SET quantity = $1 WHERE user_email = $2 AND product_id = $3"
+	result, err := db.db.Exec(query, quantity, userEmail, productID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New("cart item not found")
+	}
+
+	return nil
+}
+
+func (db *UserDB) RemoveFromCart(userEmail string, productID int) error {
+	query := "DELETE FROM cart WHERE user_email = $1 AND product_id = $2"
+	result, err := db.db.Exec(query, userEmail, productID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return errors.New("cart item not found")
+	}
+
+	return nil
+}
+
+func (db *UserDB) GetCart(userEmail string) ([]models.CartItem, error) {
+	query := `
+		SELECT c.product_id, c.quantity, p.name, p.price, p.imageurl 
+		FROM cart c 
+		JOIN products p ON c.product_id = p.id 
+		WHERE c.user_email = $1
+		ORDER BY c.product_id
+	`
+	rows, err := db.db.Query(query, userEmail)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cartItems []models.CartItem
+	for rows.Next() {
+		var item models.CartItem
+		err := rows.Scan(&item.ProductID, &item.Quantity, &item.Name, &item.Price, &item.ImageURL)
+		if err != nil {
+			return nil, err
+		}
+		cartItems = append(cartItems, item)
+	}
+
+	return cartItems, nil
+}
+
+func (db *UserDB) ClearCart(userEmail string) error {
+	query := "DELETE FROM cart WHERE user_email = $1"
+	_, err := db.db.Exec(query, userEmail)
+	return err
+}
