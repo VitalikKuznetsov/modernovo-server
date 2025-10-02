@@ -65,6 +65,17 @@ func SetupRoutes(router *mux.Router, staticPath string) {
 	router.HandleFunc("/api/favorites", handleRemoveFromFavorites).Methods("DELETE")
 	router.HandleFunc("/api/favorites/check", handleCheckFavorite).Methods("GET")
 
+	router.HandleFunc("/api/cart", handleGetCart).Methods("GET")
+	router.HandleFunc("/api/cart", handleAddToCart).Methods("POST")
+	router.HandleFunc("/api/cart", handleUpdateCart).Methods("PUT")
+	router.HandleFunc("/api/cart", handleRemoveFromCart).Methods("DELETE")
+	router.HandleFunc("/api/cart/clear", handleClearCart).Methods("POST")
+
+	router.HandleFunc("/api/admin/products", handleGetAdminProducts).Methods("GET")
+	router.HandleFunc("/api/admin/products", handleCreateProduct).Methods("POST")
+	router.HandleFunc("/api/admin/products/{id}", handleUpdateProduct).Methods("PUT")
+	router.HandleFunc("/api/admin/products/{id}", handleDeleteProduct).Methods("DELETE")
+
 	router.PathPrefix("/").Handler(fs)
 
 	router.PathPrefix("/images/").Handler(http.StripPrefix("/images/",
@@ -527,6 +538,367 @@ func handleGetProductDetail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(productDetail)
+}
+
+func handleAddToCart(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	var req um.CartRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	if req.Quantity <= 0 {
+		sendError(w, "Quantity must be positive", http.StatusBadRequest)
+		return
+	}
+
+	userDB, err := ud.ConnectToUserDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer userDB.Close()
+
+	err = userDB.AddToCart(userEmail, req.ProductID, req.Quantity)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendError(w, "Product not found", http.StatusNotFound)
+		} else {
+			log.Printf("Failed to add to cart: %v", err)
+			sendError(w, "Failed to add to cart", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	sendSuccess(w, "Product added to cart")
+}
+
+func handleGetCart(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	userDB, err := ud.ConnectToUserDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer userDB.Close()
+
+	cartItems, err := userDB.GetCart(userEmail)
+	if err != nil {
+		log.Printf("Failed to get cart: %v", err)
+		sendError(w, "Failed to get cart", http.StatusInternalServerError)
+		return
+	}
+
+	var total float64
+	var itemCount int
+
+	for _, item := range cartItems {
+		total += item.Price * float64(item.Quantity)
+		itemCount += item.Quantity
+	}
+
+	response := um.CartResponse{
+		Items:     cartItems,
+		Total:     total,
+		ItemCount: itemCount,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func handleUpdateCart(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	var req um.CartRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	userDB, err := ud.ConnectToUserDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer userDB.Close()
+
+	err = userDB.UpdateCartItem(userEmail, req.ProductID, req.Quantity)
+	if err != nil {
+		log.Printf("Failed to update cart: %v", err)
+		sendError(w, "Failed to update cart", http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccess(w, "Cart updated successfully")
+}
+
+func handleRemoveFromCart(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	var req um.CartRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	userDB, err := ud.ConnectToUserDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer userDB.Close()
+
+	err = userDB.RemoveFromCart(userEmail, req.ProductID)
+	if err != nil {
+		log.Printf("Failed to remove from cart: %v", err)
+		sendError(w, "Failed to remove from cart", http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccess(w, "Product removed from cart")
+}
+
+func handleClearCart(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	userDB, err := ud.ConnectToUserDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer userDB.Close()
+
+	err = userDB.ClearCart(userEmail)
+	if err != nil {
+		log.Printf("Failed to clear cart: %v", err)
+		sendError(w, "Failed to clear cart", http.StatusInternalServerError)
+		return
+	}
+
+	sendSuccess(w, "Cart cleared successfully")
+}
+
+func isAdmin(userEmail string) bool {
+	return userEmail == "ssiromas@gmail.com"
+}
+
+func handleGetAdminProducts(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	if !isAdmin(userEmail) {
+		sendError(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
+	storeDB, err := sd.ConnectToStoreDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer storeDB.Close()
+
+	products, err := storeDB.GetAllProductsAdmin()
+	if err != nil {
+		log.Printf("Failed to get products: %v", err)
+		sendError(w, "Failed to get products", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(products)
+}
+
+func handleCreateProduct(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	if !isAdmin(userEmail) {
+		sendError(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
+	var req um.AdminProductRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" || req.Price <= 0 {
+		sendError(w, "Name and price are required", http.StatusBadRequest)
+		return
+	}
+
+	storeDB, err := sd.ConnectToStoreDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer storeDB.Close()
+
+	productID, err := storeDB.CreateProduct(
+		req.Name,
+		req.Description,
+		req.Price,
+		req.ImageURL,
+		req.ImageURLs,
+	)
+	if err != nil {
+		log.Printf("Failed to create product: %v", err)
+		sendError(w, "Failed to create product", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message":    "Product created successfully",
+		"product_id": productID,
+	})
+}
+
+func handleUpdateProduct(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	if !isAdmin(userEmail) {
+		sendError(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		sendError(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	var req um.AdminProductRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		sendError(w, "Invalid JSON format", http.StatusBadRequest)
+		return
+	}
+
+	if req.Name == "" || req.Price <= 0 {
+		sendError(w, "Name and price are required", http.StatusBadRequest)
+		return
+	}
+
+	storeDB, err := sd.ConnectToStoreDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer storeDB.Close()
+
+	err = storeDB.UpdateProduct(
+		id,
+		req.Name,
+		req.Description,
+		req.Price,
+		req.ImageURL,
+		req.ImageURLs,
+	)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendError(w, "Product not found", http.StatusNotFound)
+		} else {
+			log.Printf("Failed to update product: %v", err)
+			sendError(w, "Failed to update product", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	sendSuccess(w, "Product updated successfully")
+}
+
+func handleDeleteProduct(w http.ResponseWriter, r *http.Request) {
+	userEmail, err := getCurrentUser(r)
+	if err != nil || userEmail == "" {
+		sendError(w, "Authentication required", http.StatusUnauthorized)
+		return
+	}
+
+	if !isAdmin(userEmail) {
+		sendError(w, "Admin access required", http.StatusForbidden)
+		return
+	}
+
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		sendError(w, "Invalid product ID", http.StatusBadRequest)
+		return
+	}
+
+	storeDB, err := sd.ConnectToStoreDB(container.STR)
+	if err != nil {
+		log.Printf("Database connection failed: %v", err)
+		sendError(w, "Database connection failed", http.StatusInternalServerError)
+		return
+	}
+	defer storeDB.Close()
+
+	err = storeDB.DeleteProduct(id)
+	if err != nil {
+		if err.Error() == "product not found" {
+			sendError(w, "Product not found", http.StatusNotFound)
+		} else {
+			log.Printf("Failed to delete product: %v", err)
+			sendError(w, "Failed to delete product", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	sendSuccess(w, "Product deleted successfully")
 }
 
 func sendError(w http.ResponseWriter, message string, statusCode int) {
