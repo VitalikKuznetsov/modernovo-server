@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -8,6 +9,21 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func StartServer() {
 	router := mux.NewRouter()
@@ -19,9 +35,11 @@ func StartServer() {
 
 	SetupRoutes(router, staticPath)
 
+	handler := corsMiddleware(router)
+
 	server := &http.Server{
-		Addr:    "127.0.0.1:8080",
-		Handler: router,
+		Addr:    "0.0.0.0:8080",
+		Handler: handler,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
@@ -30,21 +48,21 @@ func StartServer() {
 }
 
 func getStaticPath() (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", err
+	possiblePaths := []string{
+		"./static",
+		"../static",
+		"../../static",
+		"./../static",
 	}
 
-	staticPath := filepath.Join(wd, "..", "static")
-
-	if _, err := os.Stat(staticPath); os.IsNotExist(err) {
-		return "", err
+	for _, path := range possiblePaths {
+		if _, err := os.Stat(path); err == nil {
+			indexPath := filepath.Join(path, "index.html")
+			if _, err := os.Stat(indexPath); err == nil {
+				return path, nil
+			}
+		}
 	}
 
-	indexPath := filepath.Join(staticPath, "index.html")
-	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
-		return "", err
-	}
-
-	return staticPath, nil
+	return "", errors.New("не удалось найти папку static с index.html")
 }
