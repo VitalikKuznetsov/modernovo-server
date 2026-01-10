@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS favorites (
     product_id INTEGER REFERENCES products(id)
 );
 
-CREATE TABLE IF NOT EXISTS usersessions (
+CREATE TABLE IF NOT EXISTS user_sessions (
     token VARCHAR(64) PRIMARY KEY,
     user_email VARCHAR(50) REFERENCES users(Email),
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT NOW()
