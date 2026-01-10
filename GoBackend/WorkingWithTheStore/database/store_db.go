@@ -2,7 +2,7 @@ package database
 
 import (
 	"Modernovo/GoBackend/WorkingWithTheStore/models"
-	um "Modernovo/GoBackend/WorkingWithTheUsers/models"
+	um "Modernovo/GoBackend/WorkingWithTheUsers/Models"
 	"database/sql"
 	"errors"
 	"strings"

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: modernovo-postgres
+    environment:
+      POSTGRES_USER: modernovo
+      POSTGRES_PASSWORD: modernovo_password_123!
+      POSTGRES_DB: modernovo_prod
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - modernovo-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U modernovo -d modernovo_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: modernovo-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: modernovo
+      DB_PASSWORD: modernovo_password_123!
+      DB_NAME: modernovo_prod
+      DB_SSL_MODE: disable
+    ports:
+      - "8080:8080"
+    networks:
+      - modernovo-network
+    restart: unless-stopped
+
+networks:
+  modernovo-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

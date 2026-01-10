@@ -49,6 +49,7 @@ func StartServer() {
 
 func getStaticPath() (string, error) {
 	possiblePaths := []string{
+	    "./GoBackend/static",
 		"./static",
 		"../static",
 		"../../static",
