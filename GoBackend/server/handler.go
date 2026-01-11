@@ -5,6 +5,7 @@ import (
 	sm "Modernovo/GoBackend/WorkingWithTheStore/models"
 	ud "Modernovo/GoBackend/WorkingWithTheUsers/DataBase"
 	um "Modernovo/GoBackend/WorkingWithTheUsers/Models"
+	"Modernovo/GoBackend/weather"
 	"Modernovo/container"
 	"encoding/json"
 	"log"
@@ -49,6 +50,8 @@ func getCurrentUser(r *http.Request) (string, error) {
 
 func SetupRoutes(router *mux.Router, staticPath string) {
 	fs := http.FileServer(http.Dir(staticPath))
+
+	router.HandleFunc("/api/weather", handleGetWeather).Methods("GET")
 
 	router.HandleFunc("/api/register", handleRegister).Methods("POST")
 	router.HandleFunc("/api/login", handleLogin).Methods("POST")
@@ -911,4 +914,16 @@ func sendSuccess(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": message})
+}
+
+func handleGetWeather(w http.ResponseWriter, r *http.Request) {
+	weatherData, err := weather.GetWeatherData("Moscow")
+	if err != nil {
+		log.Printf("Weather API error: %v", err)
+		sendError(w, "Failed to get weather data", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(weatherData)
 }
