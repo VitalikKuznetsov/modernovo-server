@@ -3,8 +3,8 @@ package server
 import (
 	sd "Modernovo/GoBackend/WorkingWithTheStore/database"
 	sm "Modernovo/GoBackend/WorkingWithTheStore/models"
-	ud "Modernovo/GoBackend/WorkingWithTheUsers/database"
-	um "Modernovo/GoBackend/WorkingWithTheUsers/models"
+	ud "Modernovo/GoBackend/WorkingWithTheUsers/DataBase"
+	um "Modernovo/GoBackend/WorkingWithTheUsers/Models"
 	"Modernovo/container"
 	"encoding/json"
 	"log"
