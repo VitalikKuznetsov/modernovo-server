@@ -1702,7 +1702,7 @@ function startWeatherAutoRefresh() {
                 }
             } catch (error) {
                 console.error('Error loading product detail:', error);
-                showNotification('Ошибка сети при загрузке товара', false);
+                showNotification(error, false);
             } finally {
                 showLoading(false);
             }
