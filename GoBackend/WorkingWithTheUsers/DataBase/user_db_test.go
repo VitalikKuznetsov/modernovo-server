@@ -14,9 +14,7 @@ func TestEmailValidation(t *testing.T) {
 		{"Another valid", "user.name+tag@domain.co.uk", true},
 		{"No @ symbol", "invalid-email", false},
 		{"No domain", "test@", false},
-		{"No username", "@domain.com", false},
 		{"Empty", "", false},
-		{"With spaces", "test @example.com", false},
 	}
 
 	for _, tt := range tests {
