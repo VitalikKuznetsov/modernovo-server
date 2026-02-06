@@ -1,7 +1,7 @@
 package database
 
 import (
-	"Modernovo/GoBackend/WorkingWithTheUsers/Models"
+	models "Modernovo/GoBackend/WorkingWithTheUsers/Models"
 	"crypto/rand"
 	"database/sql"
 	"encoding/hex"
