@@ -4,7 +4,7 @@ import (
 	sd "Modernovo/GoBackend/WorkingWithTheStore/database"
 	sm "Modernovo/GoBackend/WorkingWithTheStore/models"
 	um "Modernovo/GoBackend/WorkingWithTheUsers/Models"
-	ud "Modernovo/GoBackend/WorkingWithTheUsers/database"
+	ud "Modernovo/GoBackend/WorkingWithTheUsers/DataBase"
 	"Modernovo/GoBackend/weather"
 	"Modernovo/container"
 	"encoding/json"
