@@ -1,3 +1,10 @@
+CREATE TABLE users (
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(30) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    phonenumber VARCHAR(20) NOT NULL
+);
+
 -- Создание таблицы products
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
