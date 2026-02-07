@@ -72,11 +72,45 @@ POST /api/admin/products - Создание товара (только адми�
 
 
 ## 4. Схема базы данных:
-users: Основная таблица пользователей
-products: Каталог товаров
-favorites: Избранные товары пользователей
-cart: Корзина покупок
-user_sessions
+
+```
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    imageurl VARCHAR(255),
+    image_urls TEXT[]
+);
+
+CREATE TABLE cart (
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(255) NOT NULL,
+    product_id INTEGER NOT NULL,
+    quantity INTEGER DEFAULT 1,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE favorites (
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(50) NOT NULL,
+    product_id INTEGER NOT NULL
+);
+
+CREATE TABLE user_sessions (
+    token VARCHAR(64) PRIMARY KEY,
+    user_email VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(30) NOT NULL,
+    name VARCHAR(50) ,
+    phonenumber VARCHAR(20)
+);
+```
 
 ## 5. Написание кода
 
@@ -170,3 +204,7 @@ Docker запускается
 API работает
 Тесты проходят
 База данных сохраняет данные
+
+## 11. Диаграмма C4
+
+
