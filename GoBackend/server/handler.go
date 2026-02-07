@@ -714,7 +714,7 @@ func handleClearCart(w http.ResponseWriter, r *http.Request) {
 }
 
 func isAdmin(userEmail string) bool {
-	return userEmail == "ssiromas@gmail.com"
+	return userEmail == "admin@mail.ru"
 }
 
 func handleGetAdminProducts(w http.ResponseWriter, r *http.Request) {

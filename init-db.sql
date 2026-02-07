@@ -32,6 +32,13 @@ CREATE TABLE user_sessions (
     created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE users (
+    email VARCHAR(50) NOT NULL,
+    password VARCHAR(30) NOT NULL,
+    name VARCHAR(50) ,
+    phonenumber VARCHAR(20)
+);
+
 -- Вставка данных в таблицу products
 INSERT INTO products (id, name, description, price, imageurl, image_urls) VALUES
 (2, 'Конвектор серый', 'Описание конвектора', 2000.00, 'RedHeart/img.png', ARRAY['RedHeart/img.png', 'RedHeart/img_1.png']),
